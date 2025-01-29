@@ -1,0 +1,121 @@
+from datetime import datetimefrom datetime import datetime, timedelta
+
+def parse_time(time_str):
+    """Convert time in HH:MM format to a datetime object."""
+    return datetime.strptime(time_str, "%H:%M")
+
+def format_time(time_obj):
+    """Convert a datetime object to time in HH:MM format."""
+    return time_obj.strftime("%H:%M")
+
+def detect_conflicts(events):
+    """Detect conflicts between events."""
+    conflicts = []
+    for i in range(len(events)):
+        for j in range(i + 1, len(events)):
+            if events[i]["end"] > events[j]["start"] and events[i]["start"] < events[j]["end"]:
+                conflicts.append((events[i]["name"], events[j]["name"]))
+    return conflicts
+
+def suggest_resolutions(events, conflicts):
+    """Suggest resolutions for conflicting events."""
+    resolutions = []
+    for conflict in conflicts:
+        event1 = next(e for e in events if e["name"] == conflict[0])
+        event2 = next(e for e in events if e["name"] == conflict[1])
+
+        # Suggest moving event2 to after event1 ends
+        new_start = event1["end"]
+        new_end = new_start + (event2["end"] - event2["start"])
+        resolutions.append(f"Reschedule '{event2['name']}' to Start: '{format_time(new_start)}', End: '{format_time(new_end)}'")
+    return resolutions
+
+def main():
+    # Example input
+    events = [
+        {"name": "Meeting A", "start": parse_time("09:00"), "end": parse_time("10:30")},
+        {"name": "Workshop B", "start": parse_time("10:00"), "end": parse_time("11:30")},
+        {"name": "Lunch Break", "start": parse_time("12:00"), "end": parse_time("13:00")},
+        {"name": "Presentation C", "start": parse_time("10:30"), "end": parse_time("12:00")},
+    ]
+
+    # Sort events by start time
+    events.sort(key=lambda x: x["start"])
+
+    # Detect conflicts
+    conflicts = detect_conflicts(events)
+
+    # Suggest resolutions
+    resolutions = suggest_resolutions(events, conflicts)
+
+    # Output the results
+    print("Sorted Schedule:")
+    for event in events:
+        print(f"- {event['name']}, Start: '{format_time(event['start'])}', End: '{format_time(event['end'])}'")
+
+    print("\nConflicting Events:")
+    for conflict in conflicts:
+        print(f"- {conflict[0]} and {conflict[1]}")
+
+    print("\nSuggested Resolutions:")
+    for resolution in resolutions:
+        print(f"- {resolution}")
+
+if _name_ == "_main_":
+    main()
+
+class Event:
+    def __init__(self, name, start_time, end_time):
+        self.name = name
+        self.start_time = start_time
+        self.end_time = end_time
+
+    def __repr__(self):
+        return f"Event(name={self.name}, start_time={self.start_time}, end_time={self.end_time})"
+
+class Scheduler:
+    def __init__(self):
+        self.events = []
+
+    def add_event(self, event):
+        if self.detect_conflict(event):
+            print(f"Conflict detected for event '{event.name}'!")
+            return False
+        self.events.append(event)
+        print(f"Event '{event.name}' scheduled successfully!")
+        return True
+
+    def detect_conflict(self, new_event):
+        for event in self.events:
+            if (new_event.start_time < event.end_time and new_event.end_time > event.start_time):
+                return True  # There's a conflict
+        return False
+
+    def display_schedule(self):
+        if not self.events:
+            print("No events scheduled.")
+        else:
+            print("Scheduled Events:")
+            for event in sorted(self.events, key=lambda e: e.start_time):
+                print(event)
+
+# Helper function to parse string into datetime
+def parse_datetime(date_str):
+    return datetime.strptime(date_str, "%Y-%m-%d %H:%M")
+
+# Example Usage:
+scheduler = Scheduler()
+
+# Define some events
+event1 = Event("Meeting with Bob", parse_datetime("2025-02-01 09:00"), parse_datetime("2025-02-01 10:00"))
+event2 = Event("Team Lunch", parse_datetime("2025-02-01 12:00"), parse_datetime("2025-02-01 13:00"))
+event3 = Event("Project Review", parse_datetime("2025-02-01 10:30"), parse_datetime("2025-02-01 11:30"))
+
+# Add events to scheduler
+scheduler.add_event(event1)  # No conflict, should succeed
+scheduler.add_event(event2)  # No conflict, should succeed
+scheduler.add_event(event3)  # Conflict with Meeting with Bob, should fail
+
+# Display the schedule
+scheduler.display_schedule()
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
